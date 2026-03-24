@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <title>НАТА ТЕТРИС v1-07-08</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;500;700&display=swap');
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body.dark{--bg:#111;--fg:#f5f0eb;--gray:#888;--sub:#bbb;--brd:rgba(255,255,255,.22);--selbg:#f5f0eb;--selfg:#111;--cbg:rgba(255,255,255,.09);--grid:rgba(255,255,255,.07);--bb:rgba(255,255,255,.3);--ghost:rgba(245,240,235,.15);--board:#111;--p1:#f5f0eb;--p2:#ccc;--ov:rgba(8,8,8,.97);--inp:rgba(255,255,255,.07)}
 body.light{--bg:#fff;--fg:#0a0a0a;--gray:#555;--sub:#222;--brd:rgba(0,0,0,.22);--selbg:#0a0a0a;--selfg:#fff;--cbg:rgba(0,0,0,.07);--grid:rgba(0,0,0,.09);--bb:rgba(0,0,0,.32);--ghost:rgba(0,0,0,.12);--board:#fff;--p1:#0a0a0a;--p2:#333;--ov:rgba(255,255,255,.97);--inp:rgba(0,0,0,.05)}
@@ -329,20 +331,9 @@ function showLb(){renderLb("fullLb","");showScreen("leadersScreen")}
 
 // === ИГРОВОЙ ДВИЖОК ===
 var COLS=10,ROWS=20;
-// Размер клетки — вычисляем при старте игры
-var CELL=0,W=0,H=0,NC=0;
-function calcCell(){
-  var iH=window.innerHeight||screen.height||667;
-  var iW=window.innerWidth||screen.width||375;
-  var availH=iH-50-26;
-  CELL=Math.min(Math.floor(availH/ROWS),Math.floor(iW*.52/COLS));
-  if(CELL<10)CELL=28; // запасной размер
-  W=COLS*CELL;H=ROWS*CELL;NC=Math.max(11,Math.floor(CELL*.6));
-  var gc=document.getElementById("gc");
-  gc.width=W;gc.height=H;
-  var nc2=document.getElementById("nc");
-  nc2.width=4*NC;nc2.height=4*NC;
-}
+var availH=window.innerHeight-50-26;
+var CELL=Math.min(Math.floor(availH/ROWS),Math.floor(window.innerWidth*.52/COLS));
+var W=COLS*CELL,H=ROWS*CELL,NC=Math.max(11,Math.floor(CELL*.6));
 var SPEEDS={novice:700,pro:360,expert:160};
 var BP={novice:1,pro:2,expert:3},BL={novice:10,pro:20,expert:30},BB={novice:10,pro:20,expert:30};
 var curP=1,curL=10,curB=10;
@@ -350,7 +341,9 @@ var SHAPES=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,
 var CLR=["#c084fc","#67e8f9","#86efac","#fbbf24","#f87171","#f9a8d4","#a5b4fc"];
 
 var canvas=document.getElementById("gc"),ctx=canvas.getContext("2d");
+canvas.width=W;canvas.height=H;
 var nc2=document.getElementById("nc"),nctx=nc2.getContext("2d");
+nc2.width=4*NC;nc2.height=4*NC;
 
 var board,cur=null,nxt,score,level,lines,diff,pname,tStart=0;
 var gloop=null,dlock=false,paused=false,gover=false;
@@ -368,9 +361,6 @@ function rotCW(sh){var n=[];for(var c=0;c<sh[0].length;c++){n.push([]);for(var r
 function rotCCW(sh){var n=[];for(var c=sh[0].length-1;c>=0;c--){n.push([]);for(var r=0;r<sh.length;r++)n[sh[0].length-1-c].push(sh[r][c])}return n}
 
 function startGame(){
-  calcCell(); // пересчитываем размер под текущий экран
-  ctx=canvas.getContext("2d");
-  nctx=nc2.getContext("2d");
   var nm=document.getElementById("nameInp").value.trim()||lsG("NT_nm")||"Игрок";
   document.getElementById("nameInp").value=nm;lsS("NT_nm",nm);
   pname=nm;diff=selDiff;board=newBoard();score=0;level=1;lines=0;
