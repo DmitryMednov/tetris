@@ -56,7 +56,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--fg);mi
   .cb{height:auto;width:54px;min-height:44px}
   .g-ftr{display:none}
 }
-@media(min-width:1024px) and (orientation:landscape){.ctrl{display:none}.kb-hint{display:flex!important}}
+@media(min-width:1024px) and (orientation:landscape){.ctrl{display:none}.kb-hint{display:flex!important;position:fixed;bottom:0;left:0;right:0;z-index:5;width:100%}}
 .kb-hint{display:none;justify-content:center;gap:6px;padding:4px;font-size:8px;color:var(--gray);text-transform:uppercase;flex-shrink:0;background:var(--bg);width:100%;flex-wrap:wrap}
 .key{border:1px solid var(--brd);border-radius:3px;padding:2px 5px;color:var(--fg);font-size:9px}
 .ov{position:fixed;inset:0;background:var(--ov);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:100;padding:20px;overflow-y:auto}
@@ -332,9 +332,16 @@ function showLb(){renderLb("fullLb","");showScreen("leadersScreen")}
 
 // === ИГРОВОЙ ДВИЖОК ===
 var COLS=10,ROWS=20;
-var availH=window.innerHeight-50-26;
-var CELL=Math.min(Math.floor(availH/ROWS),Math.floor(window.innerWidth*.52/COLS));
-var W=COLS*CELL,H=ROWS*CELL,NC=Math.max(11,Math.floor(CELL*.6));
+var CELL,W,H,NC;
+function calcSize(){
+  var isLand=window.innerWidth>window.innerHeight;
+  var aH,maxW;
+  if(isLand){aH=window.innerHeight-30;maxW=(window.innerWidth-100)*0.55}
+  else{aH=window.innerHeight-50-26;maxW=window.innerWidth*0.52}
+  CELL=Math.max(8,Math.min(Math.floor(aH/ROWS),Math.floor(maxW/COLS)));
+  W=COLS*CELL;H=ROWS*CELL;NC=Math.max(11,Math.floor(CELL*.6));
+}
+calcSize();
 var SPEEDS={novice:700,pro:360,expert:160};
 var BP={novice:1,pro:2,expert:3},BL={novice:10,pro:20,expert:30},BB={novice:10,pro:20,expert:30};
 var curP=1,curL=10,curB=10;
@@ -348,6 +355,8 @@ nc2.width=4*NC;nc2.height=4*NC;
 
 var board,cur=null,nxt,score,level,lines,diff,pname,tStart=0;
 var gloop=null,dlock=false,paused=false,gover=false;
+var _rzT;window.addEventListener("resize",function(){clearTimeout(_rzT);_rzT=setTimeout(function(){
+  calcSize();canvas.width=W;canvas.height=H;nc2.width=4*NC;nc2.height=4*NC;if(cur)render()},150)});
 
 function updateRates(lvl){
   var m=1+(lvl-1)*.5;
